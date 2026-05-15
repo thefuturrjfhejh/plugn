@@ -39,6 +39,33 @@ $(function () {
 
 ";
 $this->registerJs($js);
+
+$encodeProviderValue = static function ($value) {
+    return $value ? Html::encode($value) : null;
+};
+
+$providerStatusBadge = static function ($value) {
+    return $value ? '<span style="font-size:20px; font-weight: 700">' . Html::encode($value) . '</span>' : null;
+};
+
+$providerTrackingLink = static function ($value) use ($encodeProviderValue) {
+    $value = trim((string) $value);
+
+    if ($value === '') {
+        return null;
+    }
+
+    $scheme = strtolower((string) parse_url($value, PHP_URL_SCHEME));
+
+    if (in_array($scheme, ['http', 'https'], true) && filter_var($value, FILTER_VALIDATE_URL)) {
+        return Html::a(Html::encode($value), $value, [
+            'target' => '_blank',
+            'rel' => 'noopener noreferrer',
+        ]);
+    }
+
+    return $encodeProviderValue($value);
+};
 ?>
 
 
@@ -371,66 +398,64 @@ if ($model->order_status != Order::STATUS_CANCELED && $model->order_status != Or
                         [
                             'attribute' => 'armada_tracking_link',
                             'format' => 'raw',
-                            'value' => function ($data) {
-                                return Html::a($data->armada_tracking_link, \yii\helpers\Url::to($data->armada_tracking_link, true), ['target' => '_blank']);
+                            'value' => function ($data) use ($providerTrackingLink) {
+                                return $providerTrackingLink($data->armada_tracking_link);
                             },
                             'visible' => $model->armada_tracking_link != null,
                         ],
                         [
                             'attribute' => 'armada_delivery_code',
                             'format' => 'raw',
-                            'value' => function ($data) {
-                                return Html::a($data->armada_delivery_code, \yii\helpers\Url::to($data->armada_delivery_code, true), ['target' => '_blank']);
+                            'value' => function ($data) use ($encodeProviderValue) {
+                                return $encodeProviderValue($data->armada_delivery_code);
                             },
                             'visible' => $model->armada_delivery_code != null,
                         ],
                         [
                             'attribute' => 'armada_order_status',
                             'format' => 'raw',
-                            'value' => function ($data) {
-                                return $data->armada_order_status ? '<span  style="font-size:20px; font-weight: 700" >' . $data->armada_order_status . '</span>' : null;
+                            'value' => function ($data) use ($providerStatusBadge) {
+                                return $providerStatusBadge($data->armada_order_status);
                             },
                             'visible' => $model->armada_order_status != null,
                         ],
                         [
                             'attribute' => 'mashkor_order_number',
                             'format' => 'raw',
-                            'value' => function ($data) {
-                                return $data->mashkor_order_number ? $data->mashkor_order_number : null;
+                            'value' => function ($data) use ($encodeProviderValue) {
+                                return $encodeProviderValue($data->mashkor_order_number);
                             },
                             'visible' => $model->mashkor_order_number != null,
                         ],
                         [
                             'attribute' => 'mashkor_order_status',
                             'format' => 'raw',
-                            'value' => function ($data) {
-                                return $data->mashkor_order_status ? '<span  style="font-size:20px; font-weight: 700" >' . Yii::$app->mashkorDelivery->getOrderStatus($data->mashkor_order_status) . '</span>' : null;
+                            'value' => function ($data) use ($providerStatusBadge) {
+                                return $data->mashkor_order_status ? $providerStatusBadge(Yii::$app->mashkorDelivery->getOrderStatus($data->mashkor_order_status)) : null;
                             },
                             'visible' => $model->mashkor_order_status != null,
                         ],
                         [
                             'attribute' => 'mashkor_tracking_link',
                             'format' => 'raw',
-                            'value' => function ($data) {
-
-
-                                return Html::a($data->mashkor_tracking_link, \yii\helpers\Url::to($data->mashkor_tracking_link, true), ['target' => '_blank']);
+                            'value' => function ($data) use ($providerTrackingLink) {
+                                return $providerTrackingLink($data->mashkor_tracking_link);
                             },
                             'visible' => $model->mashkor_tracking_link != null,
                         ],
                         [
                             'attribute' => 'mashkor_driver_phone',
                             'format' => 'raw',
-                            'value' => function ($data) {
-                                return $data->mashkor_driver_phone ? $data->mashkor_driver_phone : null;
+                            'value' => function ($data) use ($encodeProviderValue) {
+                                return $encodeProviderValue($data->mashkor_driver_phone);
                             },
                             'visible' => $model->mashkor_driver_phone != null,
                         ],
                         [
                             'attribute' => 'mashkor_driver_name',
                             'format' => 'raw',
-                            'value' => function ($data) {
-                                return $data->mashkor_driver_name ? $data->mashkor_driver_name : null;
+                            'value' => function ($data) use ($encodeProviderValue) {
+                                return $encodeProviderValue($data->mashkor_driver_name);
                             },
                             'visible' => $model->mashkor_driver_name != null,
                         ],
